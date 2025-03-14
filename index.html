@@ -3,41 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Címke Generáló Program</title>
+  <title>Logisztikai Alkalmazás</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
     }
-    .tab {
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+    .navbar {
+      background-color: #444;
       overflow: hidden;
-      border-bottom: 1px solid #ccc;
     }
-    .tab button {
-      background-color: #f1f1f1;
+    .navbar a {
       float: left;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      padding: 14px 16px;
-      transition: 0.3s;
-      font-size: 16px;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
     }
-    .tab button:hover {
-      background-color: #ddd;
+    .navbar a:hover {
+      background-color: #555;
     }
-    .tab button.active {
-      background-color: #ccc;
-    }
-    .tabcontent {
+    .lap-content {
       display: none;
       padding: 20px;
-      border: 1px solid #ccc;
-      border-top: none;
+      background-color: white;
+      border-radius: 5px;
+      margin-top: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+    .lap-content.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .error {
+      color: red;
+      margin-top: 5px;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+    /* Címke stílusok */
     .label-container {
-      width: 798px; /* 60 mm 300 DPI + extra 90 px a QR-kód méretének növeléséhez */
+      width: 708px; /* 60 mm 300 DPI */
       height: 354px; /* 30 mm 300 DPI */
       border: 1px solid black;
       margin: 20px auto;
@@ -47,19 +126,19 @@
       position: relative;
     }
     .qr-code {
-      width: 390px; /* QR-kód mérete 30%-kal növelve */
-      height: 390px;
-      margin: -20px 10px 0 10px; /* QR-kód feljebb rakása */
+      width: 300px; /* QR-kód mérete visszaállítva az eredetire */
+      height: 300px;
+      margin: 27px 10px; /* Függőlegesen középre igazítás */
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
     }
     #qrcode {
       max-width: 100%;
       max-height: 100%;
     }
     .text-area {
-      width: 378px; /* Maradék szélesség */
+      width: 378px; /* Maradék szélesség (708 - 300 - 2*10 margin) */
       height: 354px; /* Teljes magasság */
       margin: 0 10px;
       display: flex;
@@ -88,104 +167,567 @@
   </style>
 </head>
 <body>
-  <h2>Címke Generáló Program</h2>
-
-  <!-- Tab navigáció -->
-  <div class="tab">
-    <button class="tablinks" onclick="openTab(event, 'Generate')" id="defaultOpen">Címke generálása</button>
-    <button class="tablinks" onclick="openTab(event, 'Print')">Címke nyomtatása</button>
-    <button class="tablinks" onclick="openTab(event, 'Other1')">További lap 1</button>
-    <button class="tablinks" onclick="openTab(event, 'Other2')">További lap 2</button>
-  </div>
-
-  <!-- Tab tartalmak -->
-  <div id="Generate" class="tabcontent">
-    <h3>Címke generálása</h3>
-    <div>
-      <label for="text-input">Címke adat (pl. 3000002345|Liechti 20.34/Hidraulik pump):</label>
-      <input type="text" id="text-input" value="3000002345|Liechti 20.34/Hidraulik pump" maxlength="60" style="width: 400px; margin: 10px 0;">
-      <button onclick="generateQRCode()">Címke generálása</button>
+  <div class="container">
+    <div class="header">
+      <h1>Logisztikai Alkalmazás</h1>
     </div>
-    <div id="label-container" class="label-container">
-      <div class="qr-code">
-        <canvas id="qrcode"></canvas>
+    <div class="navbar">
+      <a href="#" onclick="showLap(1)">QR Kód Generálás</a>
+      <a href="#" onclick="showLap(2)">QR Kód Olvasás</a>
+      <a href="#" onclick="showLap(3)">Foglalások</a>
+      <a href="#" onclick="showLap(4)">Verziótörténet</a>
+      <a href="#" onclick="showSettings()">Beállítások</a>
+    </div>
+
+    <!-- Lap 1: QR Kód Generálás -->
+    <div id="lap1" class="lap-content active">
+      <h2>QR Kód Generálás</h2>
+      <div class="form-group">
+        <label for="text-input">Szöveg (pl. Anyagszám|Megnevezés):</label>
+        <input type="text" id="text-input" maxlength="60" placeholder="Pl. A123|Csavar M10" value="3000002345|Liechti 20.34/Hidraulik pump">
+        <small>Hátralévő karakterek: <span id="remaining-chars">60</span></small>
       </div>
-      <div class="text-area">
-        <div class="anyagszam"><span id="szam"></span></div>
-        <div style="height: 10px;"></div> <!-- Üres sor -->
-        <div><span id="szoveg"></span></div>
+      <button onclick="generateQRCode()">QR kód generálása</button>
+      <button onclick="printLabel()">Címke nyomtatása</button>
+      <div id="qr-error" class="error"></div>
+      <div id="label-container" class="label-container">
+        <div class="qr-code">
+          <canvas id="qrcode"></canvas>
+        </div>
+        <div class="text-area">
+          <div class="anyagszam"><span id="szam"></span></div>
+          <div style="height: 10px;"></div> <!-- Üres sor -->
+          <div><span id="szoveg"></span></div>
+        </div>
       </div>
+    </div>
+
+    <!-- Lap 2: QR Kód Olvasás -->
+    <div id="lap2" class="lap-content">
+      <h2>QR Kód Olvasás</h2>
+      <div class="form-group">
+        <label for="select-terulet">Terület:</label>
+        <select id="select-terulet" onchange="updateMachineDropdown()">
+          <option value="">Válassz területet</option>
+          <option value="MFC-terület">MFC-terület</option>
+          <option value="MFS-terület">MFS-terület</option>
+          <option value="MFH-terület">MFH-terület</option>
+          <option value="M2B-terület">M2B-terület</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="select-machine">Gép:</label>
+        <select id="select-machine">
+          <option value="">Válassz gépet</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="kivet-bevetel">Kivet/Bevétel:</label>
+        <select id="kivet-bevetel">
+          <option value="Kivet">Kivet</option>
+          <option value="Bevétel">Bevétel</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="raktar">Raktár:</label>
+        <select id="raktar">
+          <option value="Raktár 1">Raktár 1</option>
+          <option value="Raktár 2">Raktár 2</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="darabszam">Darabszám:</label>
+        <input type="number" id="darabszam" min="1" value="1">
+      </div>
+      <button id="start-camera-btn" onclick="startQRReader()">Kamera indítása</button>
+      <button id="stop-camera-btn" onclick="stopQRReader()" style="display: none;">Kamera leállítása</button>
+      <video id="video" style="display: none;"></video>
+      <canvas id="canvas"></canvas>
+      <div id="qr-reader-result"></div>
+      <div id="qr-reader-error" class="error"></div>
+    </div>
+
+    <!-- Lap 3: Foglalások -->
+    <div id="lap3" class="lap-content">
+      <h2>Foglalások</h2>
+      <button id="delete-all-btn">Összes törlése</button>
+      <table>
+        <thead>
+          <tr>
+            <th>Sorszám</th>
+            <th>Anyagszám</th>
+            <th>Megnevezés</th>
+            <th>Terület</th>
+            <th>Gépnév</th>
+            <th>Belső Megrendelési Szám</th>
+            <th>Költséghely Szám</th>
+            <th>Kivet/Bevétel</th>
+            <th>Raktár</th>
+            <th>Darabszám</th>
+            <th>QR Kód</th>
+            <th>Dátum</th>
+            <th>Művelet</th>
+          </tr>
+        </thead>
+        <tbody id="foglalas-body">
+          <tr><td colspan="13">Nincs foglalás.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Lap 4: Verziótörténet -->
+    <div id="lap4" class="lap-content">
+      <h2>Verziótörténet</h2>
+      <button onclick="showVersionHistory()">Verziótörténet megtekintése</button>
+    </div>
+
+    <!-- Lap 5: Beállítások -->
+    <div id="lap5" class="lap-content" style="display: none;">
+      <h2>Beállítások</h2>
+      <button id="add-machine-btn">Gép hozzáadása</button>
+      <table>
+        <thead>
+          <tr>
+            <th>Terület</th>
+            <th>Gépnév</th>
+            <th>Belső Megrendelési Szám</th>
+            <th>Költséghely Szám</th>
+            <th>Művelet</th>
+          </tr>
+        </thead>
+        <tbody id="machine-body"></tbody>
+      </table>
     </div>
   </div>
 
-  <div id="Print" class="tabcontent">
-    <h3>Címke nyomtatása</h3>
-    <button onclick="printLabel()">Címke nyomtatása</button>
-    <p>A nyomtatás előtt győződj meg róla, hogy a címke generálva van!</p>
+  <!-- Jelszavas popup a Beállításokhoz -->
+  <div class="popup-overlay" id="settings-password-overlay"></div>
+  <div class="popup" id="settings-password-popup">
+    <h3>Jelszó megadása</h3>
+    <div class="form-group">
+      <label for="settings-password">Jelszó:</label>
+      <input type="password" id="settings-password">
+      <div id="settings-password-error" class="error"></div>
+    </div>
+    <button onclick="checkSettingsPassword()">Belépés</button>
+    <button onclick="closeSettingsPopup()">Mégse</button>
   </div>
 
-  <div id="Other1" class="tabcontent">
-    <h3>További lap 1</h3>
-    <p>Itt lesz a további tartalom...</p>
+  <!-- Verziótörténet popup -->
+  <div class="popup-overlay" id="version-history-overlay"></div>
+  <div class="popup" id="version-history-popup">
+    <h3>Verziótörténet</h3>
+    <p>1.0 - Kezdeti verzió (2025.03.01)</p>
+    <p>1.1 - QR kód olvasás hozzáadva (2025.03.05)</p>
+    <p>1.2 - Foglalások kezelése (2025.03.10)</p>
+    <button onclick="closeVersionHistory()">Bezárás</button>
   </div>
 
-  <div id="Other2" class="tabcontent">
-    <h3>További lap 2</h3>
-    <p>Itt lesz a további tartalom...</p>
+  <!-- Törlés jelszavas popup -->
+  <div class="popup-overlay" id="delete-password-overlay"></div>
+  <div class="popup" id="delete-password-popup">
+    <h3>Jelszó megadása</h3>
+    <div class="form-group">
+      <label for="delete-password">Jelszó:</label>
+      <input type="password" id="delete-password">
+      <div id="delete-password-error" class="error"></div>
+    </div>
+    <button onclick="checkPassword()">Törlés</button>
+    <button onclick="closeDeletePopup()">Mégse</button>
   </div>
 
   <script>
-    function openTab(evt, tabName) {
-      // Elrejtjük az összes tab tartalmat
-      const tabcontent = document.getElementsByClassName("tabcontent");
-      for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-      }
+    // JSON adatforrás (ideiglenesen beágyazva, később fájlból töltjük be)
+    const foglalasData = {
+      "gepek": {
+        "MFC-terület": [
+          { "nev": "DMG 1", "rendelesiSzam": "U00980000101", "koltseghelySzam": "15009126" },
+          { "nev": "DMG 2", "rendelesiSzam": "U00980000102", "koltseghelySzam": "15009126" }
+        ],
+        "MFS-terület": [
+          { "nev": "TOS 1", "rendelesiSzam": "935036", "koltseghelySzam": "15009115" }
+        ],
+        "MFH-terület": [
+          { "nev": "Blohm 30/299", "rendelesiSzam": "U941030_299", "koltseghelySzam": "15009450" }
+        ],
+        "M2B-terület": [
+          { "nev": "Böhringer DUS 001/175", "rendelesiSzam": "", "koltseghelySzam": "15009131" }
+        ]
+      },
+      "foglalasok": []
+    };
 
-      // Eltávolítjuk az "active" osztályt az összes tab gombról
-      const tablinks = document.getElementsByClassName("tablinks");
-      for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
-
-      // Megjelenítjük a kiválasztott tab tartalmat, és aktiváljuk a gombot
-      document.getElementById(tabName).style.display = "block";
-      evt.currentTarget.className += " active";
+    // Lapváltás
+    function showLap(lap) {
+      var lapok = document.querySelectorAll('.lap-content');
+      lapok.forEach(function(lapContent) {
+        lapContent.classList.remove('active');
+      });
+      document.getElementById('lap' + lap).classList.add('active');
+      if (lap === 2) updateMachineDropdown(); // Gépek dropdown frissítése
+      if (lap === 3) updateFoglalasLista(); // Foglalási lap betöltésekor frissítjük a listát
     }
 
+    // Beállítások lap jelszavas védelme
+    function showSettings() {
+      document.getElementById("settings-password-popup").style.display = "block";
+      document.getElementById("settings-password-overlay").style.display = "block";
+    }
+
+    function checkSettingsPassword() {
+      const password = document.getElementById("settings-password").value;
+      if (password === "admin") {
+        document.getElementById("settings-password-popup").style.display = "none";
+        document.getElementById("settings-password-overlay").style.display = "none";
+        document.getElementById("lap5").style.display = "block";
+        updateMachineTable();
+      } else {
+        document.getElementById("settings-password-error").textContent = "Helytelen jelszó!";
+      }
+      document.getElementById("settings-password").value = "";
+    }
+
+    function closeSettingsPopup() {
+      document.getElementById("settings-password-popup").style.display = "none";
+      document.getElementById("settings-password-overlay").style.display = "none";
+      document.getElementById("settings-password").value = "";
+      document.getElementById("settings-password-error").textContent = "";
+    }
+
+    // Verziótörténet megjelenítése és bezárása
+    function showVersionHistory() {
+      document.getElementById("version-history-popup").style.display = "block";
+      document.getElementById("version-history-overlay").style.display = "block";
+    }
+    function closeVersionHistory() {
+      document.getElementById("version-history-popup").style.display = "none";
+      document.getElementById("version-history-overlay").style.display = "none";
+    }
+
+    // Karakter számláló a szövegbevitelnél
+    document.getElementById("text-input").addEventListener("input", function() {
+      var maxChars = 60;
+      var remaining = maxChars - this.value.length;
+      document.getElementById("remaining-chars").textContent = remaining;
+    });
+
+    // QR kód generálása
     function generateQRCode() {
-      const text = document.getElementById("text-input").value.trim();
+      var text = document.getElementById("text-input").value.trim();
       if (!text) {
-        alert("Kérlek, adj meg szöveget!");
+        document.getElementById("qr-error").textContent = "Kérlek, írj be valamilyen szöveget!";
         return;
       }
-      const parts = text.split("|");
-      const anyagszám = parts[0] || "";
-      const textPart = parts.slice(1).join("|") || "";
-      document.getElementById("szam").textContent = anyagszám;
+      var parts = text.split("|");
+      var anyagszam = parts[0] || "";
+      var textPart = parts.slice(1).join("|") || "";
+      document.getElementById("szam").textContent = anyagszam;
       document.getElementById("szoveg").textContent = textPart;
 
       const labelContainer = document.getElementById("label-container");
       labelContainer.style.display = "flex"; // Biztosítom, hogy látható legyen
       const qrcodeCanvas = document.getElementById("qrcode");
-      qrcodeCanvas.width = 390;
-      qrcodeCanvas.height = 390;
-      QRCode.toCanvas(qrcodeCanvas, text, { width: 390 }, function(error) {
+      qrcodeCanvas.width = 300;
+      qrcodeCanvas.height = 300;
+      QRCode.toCanvas(qrcodeCanvas, text, { width: 300 }, function(error) {
         if (error) {
-          console.error("QR-kód hiba:", error);
-          alert("Hiba a QR-kód generálásakor: " + error.message);
+          document.getElementById("qr-error").textContent = "Hiba történt a QR-kód generálása közben: " + error.message;
         } else {
-          console.log("QR-kód sikeresen generálva!");
+          document.getElementById("qr-error").textContent = "";
         }
       });
     }
 
+    // Címke nyomtatása
     function printLabel() {
       window.print();
     }
 
-    // Az alapértelmezett tab megnyitása betöltéskor
-    document.getElementById("defaultOpen").click();
+    // QR kód olvasás
+    let videoStream = null;
+    let isScanning = false;
+
+    function startQRReader() {
+      if (isScanning) {
+        document.getElementById("qr-reader-error").textContent = "A kamera már fut. Előbb állítsd le!";
+        return;
+      }
+
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } } })
+        .then(stream => {
+          videoStream = stream;
+          video.srcObject = stream;
+          video.play();
+          isScanning = true;
+          video.style.display = "block";
+          document.getElementById("start-camera-btn").style.display = "none";
+          document.getElementById("stop-camera-btn").style.display = "inline";
+          document.getElementById("qr-reader-error").textContent = "";
+
+          video.onloadedmetadata = () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            scanQRCode(video, canvas, ctx);
+          };
+        })
+        .catch(err => {
+          document.getElementById("qr-reader-error").textContent = "Kamera indítási hiba: " + err.message;
+        });
+    }
+
+    function scanQRCode(video, canvas, ctx) {
+      if (!isScanning) return;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+
+      if (code) {
+        document.getElementById("qr-reader-result").textContent = "QR Kód olvasva: " + code.data;
+        processFoglalas(code.data);
+        stopQRReader();
+      } else {
+        document.getElementById("qr-reader-result").textContent = "QR kód keresése...";
+        requestAnimationFrame(() => scanQRCode(video, canvas, ctx));
+      }
+    }
+
+    function stopQRReader() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+        isScanning = false;
+        document.getElementById("video").style.display = "none";
+        document.getElementById("qr-reader-result").textContent = "Kamera leállítva.";
+        document.getElementById("qr-reader-error").textContent = "";
+        document.getElementById("start-camera-btn").style.display = "inline";
+        document.getElementById("stop-camera-btn").style.display = "none";
+      }
+    }
+
+    // Gépek dropdown frissítése
+    function updateMachineDropdown() {
+      const selectTerulet = document.getElementById("select-terulet");
+      const selectMachine = document.getElementById("select-machine");
+      const terulet = selectTerulet.value;
+      selectMachine.innerHTML = "<option value=''>Válassz gépet</option>";
+      if (terulet && foglalasData.gepek[terulet]) {
+        foglalasData.gepek[terulet].forEach(gep => {
+          const option = document.createElement("option");
+          option.value = gep.nev;
+          option.text = `${gep.nev} (${gep.rendelesiSzam || 'N/A'})`;
+          selectMachine.appendChild(option);
+        });
+      }
+    }
+
+    // Foglalások kezelése
+    let foglalasok = foglalasData.foglalasok;
+
+    function saveFoglalas(cimkeInput) {
+      const parts = cimkeInput.split("|");
+      const anyagszam = parts[0] || "";
+      const megnevezes = parts.slice(1).join("|") || "";
+      const selectedTerulet = document.getElementById("select-terulet").value;
+      const selectedMachine = document.getElementById("select-machine").value;
+      const kivetBevetel = document.getElementById("kivet-bevetel").value;
+      const raktar = document.getElementById("raktar").value;
+      const darabszam = parseInt(document.getElementById("darabszam").value) || 1;
+      const currentDate = new Date().toLocaleString('hu-HU', {
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      // Gép adatainak lekérdezése
+      const gep = foglalasData.gepek[selectedTerulet]?.find(g => g.nev === selectedMachine) || {};
+
+      const foglalas = {
+        sorszam: foglalasok.length + 1,
+        anyagszam: anyagszam,
+        megnevezes: megnevezes,
+        terulet: selectedTerulet,
+        gepNev: selectedMachine,
+        belsoMegrendelesiSzam: gep.rendelesiSzam || "N/A",
+        koltseghelySzam: gep.koltseghelySzam || "N/A",
+        kivetBevetel: kivetBevetel,
+        raktar: raktar,
+        darabszam: darabszam,
+        qrKod: cimkeInput,
+        datum: currentDate
+      };
+      foglalasok.push(foglalas);
+      // Frissítjük a JSON adatot (lokálisan)
+      foglalasData.foglalasok = foglalasok;
+      updateFoglalasLista();
+    }
+
+    function processFoglalas(cimkeInput) {
+      if (cimkeInput) {
+        const parts = cimkeInput.split("|");
+        if (parts.length < 2) {
+          document.getElementById("qr-reader-error").textContent = "Hiba: Érvénytelen QR kód formátum!";
+          return;
+        }
+        const selectedTerulet = document.getElementById("select-terulet").value;
+        const selectedMachine = document.getElementById("select-machine").value;
+        const kivetBevetel = document.getElementById("kivet-bevetel").value;
+        const raktar = document.getElementById("raktar").value;
+        const darabszam = parseInt(document.getElementById("darabszam").value) || 1;
+
+        if (!selectedTerulet || !selectedMachine || !kivetBevetel || !raktar || darabszam <= 0) {
+          document.getElementById("qr-reader-error").textContent = "Kérlek, tölts ki minden mezőt helyesen!";
+          return;
+        }
+
+        // Ellenőrizzük, hogy a QR-kód már létezik-e
+        const existingFoglalas = foglalasok.find(f => f.qrKod === cimkeInput);
+        if (existingFoglalas) {
+          document.getElementById("qr-reader-error").textContent = "Ez a QR-kód már rögzítve van!";
+          return;
+        }
+
+        document.getElementById("qr-reader-result").textContent = "Foglalás sikeresen végrehajtva: " + cimkeInput;
+        saveFoglalas(cimkeInput);
+      } else {
+        document.getElementById("qr-reader-error").textContent = "Hiba: Érvénytelen QR kód!";
+      }
+    }
+
+    function updateFoglalasLista() {
+      const tbody = document.getElementById("foglalas-body");
+      if (foglalasok.length > 0) {
+        tbody.innerHTML = foglalasok.map(item => `
+          <tr>
+            <td>${item.sorszam}</td>
+            <td>${item.anyagszam}</td>
+            <td>${item.megnevezes}</td>
+            <td>${item.terulet}</td>
+            <td>${item.gepNev}</td>
+            <td>${item.belsoMegrendelesiSzam}</td>
+            <td>${item.koltseghelySzam}</td>
+            <td>${item.kivetBevetel}</td>
+            <td>${item.raktar}</td>
+            <td>${item.darabszam}</td>
+            <td>${item.qrKod}</td>
+            <td>${item.datum}</td>
+            <td><button onclick="showDeletePopup(${foglalasok.indexOf(item)})" style="background-color: #FF0000; color: white; width: 30px; height: 30px; border: none; border-radius: 5px;">T</button></td>
+          </tr>
+        `).join("");
+      } else {
+        tbody.innerHTML = "<tr><td colspan='13'>Nincs foglalás.</td></tr>";
+      }
+    }
+
+    // Törlés logika
+    function showDeletePopup(index) {
+      document.getElementById("delete-password-popup").style.display = "block";
+      document.getElementById("delete-password-overlay").style.display = "block";
+      window.deleteIndex = index;
+    }
+
+    function checkPassword() {
+      const password = document.getElementById("delete-password").value;
+      if (password === "admin") {
+        document.getElementById("delete-password-popup").style.display = "none";
+        document.getElementById("delete-password-overlay").style.display = "none";
+        if (window.deleteIndex === -1) {
+          checkPasswordForAll();
+        } else if (confirm(`Biztosan törlöd a ${window.deleteIndex + 1}. rekordot?`)) {
+          foglalasok.splice(window.deleteIndex, 1);
+          // Sorszámok újraszámozása törlés után
+          foglalasok = foglalasok.map((foglalas, index) => ({
+            ...foglalas,
+            sorszam: index + 1
+          }));
+          foglalasData.foglalasok = foglalasok; // Frissítjük a JSON adatot
+          updateFoglalasLista();
+          alert("A rekord törölve");
+        }
+      } else {
+        document.getElementById("delete-password-error").textContent = "Helytelen jelszó!";
+      }
+      document.getElementById("delete-password").value = "";
+    }
+
+    function closeDeletePopup() {
+      document.getElementById("delete-password-popup").style.display = "none";
+      document.getElementById("delete-password-overlay").style.display = "none";
+      document.getElementById("delete-password").value = "";
+      document.getElementById("delete-password-error").textContent = "";
+    }
+
+    document.getElementById("delete-all-btn").addEventListener("click", function() {
+      showDeletePopup(-1); // -1 jelzi az összes törlést
+    });
+
+    function checkPasswordForAll() {
+      const password = document.getElementById("delete-password").value;
+      if (password === "admin") {
+        document.getElementById("delete-password-popup").style.display = "none";
+        document.getElementById("delete-password-overlay").style.display = "none";
+        if (confirm("Biztosan törölni szeretnéd az összes rekordot?")) {
+          foglalasok = [];
+          foglalasData.foglalasok = foglalasok; // Frissítjük a JSON adatot
+          updateFoglalasLista();
+          alert("Az összes rekord törölve");
+        }
+      } else {
+        document.getElementById("delete-password-error").textContent = "Helytelen jelszó!";
+      }
+      document.getElementById("delete-password").value = "";
+    }
+
+    // Gépek kezelése a Beállítások lapon
+    function updateMachineTable() {
+      const tbody = document.getElementById("machine-body");
+      tbody.innerHTML = "";
+      for (let terulet in foglalasData.gepek) {
+        if (foglalasData.gepek[terulet] && Array.isArray(foglalasData.gepek[terulet])) {
+          foglalasData.gepek[terulet].forEach(gep => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${terulet}</td>
+              <td>${gep.nev || 'N/A'}</td>
+              <td>${gep.rendelesiSzam || 'N/A'}</td>
+              <td>${gep.koltseghelySzam || 'N/A'}</td>
+              <td><button onclick="deleteMachine('${terulet}', '${gep.nev}')" style="background-color: #FF0000; color: white; width: 30px; height: 30px; border: none; border-radius: 5px;">T</button></td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+      }
+    }
+
+    function deleteMachine(terulet, nev) {
+      if (confirm(`Biztosan törlöd a(z) ${nev} gépet a(z) ${terulet} területről?`)) {
+        foglalasData.gepek[terulet] = foglalasData.gepek[terulet].filter(g => g.nev !== nev);
+        if (foglalasData.gepek[terulet].length === 0) delete foglalasData.gepek[terulet];
+        updateMachineTable();
+        updateMachineDropdown();
+      }
+    }
+
+    function addMachine() {
+      const terulet = prompt("Add meg a területet (pl. MFC-terület):");
+      const nev = prompt("Add meg a gép nevét:");
+      const rendelesiSzam = prompt("Add meg a belső rendelési számot (üresen hagyható):") || "";
+      const koltseghelySzam = prompt("Add meg a költséghely számot:") || (terulet === "M2B-terület" ? "15009131" : "15009126");
+      if (terulet && nev) {
+        if (!foglalasData.gepek[terulet]) foglalasData.gepek[terulet] = [];
+        if (!foglalasData.gepek[terulet].some(g => g.nev === nev)) {
+          foglalasData.gepek[terulet].push({ nev, rendelesiSzam, koltseghelySzam });
+          updateMachineTable();
+          updateMachineDropdown();
+        } else {
+          alert("Ez a gép már létezik ezen a területen!");
+        }
+      }
+    }
+
+    document.getElementById("add-machine-btn").addEventListener("click", addMachine);
 
     // Automatikus generálás betöltéskor teszteléshez
     window.onload = function() {
