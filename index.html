@@ -10,6 +10,32 @@
       font-family: Arial, sans-serif;
       margin: 20px;
     }
+    .tab {
+      overflow: hidden;
+      border-bottom: 1px solid #ccc;
+    }
+    .tab button {
+      background-color: #f1f1f1;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+      font-size: 16px;
+    }
+    .tab button:hover {
+      background-color: #ddd;
+    }
+    .tab button.active {
+      background-color: #ccc;
+    }
+    .tabcontent {
+      display: none;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
     .label-container {
       width: 798px; /* 60 mm 300 DPI + extra 90 px a QR-kód méretének növeléséhez */
       height: 354px; /* 30 mm 300 DPI */
@@ -63,24 +89,70 @@
 </head>
 <body>
   <h2>Címke Generáló Program</h2>
-  <div>
-    <label for="text-input">Címke adat (pl. 3000002345|Liechti 20.34/Hidraulik pump):</label>
-    <input type="text" id="text-input" value="3000002345|Liechti 20.34/Hidraulik pump" maxlength="60" style="width: 400px; margin: 10px 0;">
-    <button onclick="generateQRCode()">Címke generálása</button>
-    <button onclick="printLabel()">Címke nyomtatása</button>
+
+  <!-- Tab navigáció -->
+  <div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'Generate')" id="defaultOpen">Címke generálása</button>
+    <button class="tablinks" onclick="openTab(event, 'Print')">Címke nyomtatása</button>
+    <button class="tablinks" onclick="openTab(event, 'Other1')">További lap 1</button>
+    <button class="tablinks" onclick="openTab(event, 'Other2')">További lap 2</button>
   </div>
-  <div id="label-container" class="label-container">
-    <div class="qr-code">
-      <canvas id="qrcode"></canvas>
+
+  <!-- Tab tartalmak -->
+  <div id="Generate" class="tabcontent">
+    <h3>Címke generálása</h3>
+    <div>
+      <label for="text-input">Címke adat (pl. 3000002345|Liechti 20.34/Hidraulik pump):</label>
+      <input type="text" id="text-input" value="3000002345|Liechti 20.34/Hidraulik pump" maxlength="60" style="width: 400px; margin: 10px 0;">
+      <button onclick="generateQRCode()">Címke generálása</button>
     </div>
-    <div class="text-area">
-      <div class="anyagszam"><span id="szam"></span></div>
-      <div style="height: 10px;"></div> <!-- Üres sor -->
-      <div><span id="szoveg"></span></div>
+    <div id="label-container" class="label-container">
+      <div class="qr-code">
+        <canvas id="qrcode"></canvas>
+      </div>
+      <div class="text-area">
+        <div class="anyagszam"><span id="szam"></span></div>
+        <div style="height: 10px;"></div> <!-- Üres sor -->
+        <div><span id="szoveg"></span></div>
+      </div>
     </div>
   </div>
 
+  <div id="Print" class="tabcontent">
+    <h3>Címke nyomtatása</h3>
+    <button onclick="printLabel()">Címke nyomtatása</button>
+    <p>A nyomtatás előtt győződj meg róla, hogy a címke generálva van!</p>
+  </div>
+
+  <div id="Other1" class="tabcontent">
+    <h3>További lap 1</h3>
+    <p>Itt lesz a további tartalom...</p>
+  </div>
+
+  <div id="Other2" class="tabcontent">
+    <h3>További lap 2</h3>
+    <p>Itt lesz a további tartalom...</p>
+  </div>
+
   <script>
+    function openTab(evt, tabName) {
+      // Elrejtjük az összes tab tartalmat
+      const tabcontent = document.getElementsByClassName("tabcontent");
+      for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+
+      // Eltávolítjuk az "active" osztályt az összes tab gombról
+      const tablinks = document.getElementsByClassName("tablinks");
+      for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+
+      // Megjelenítjük a kiválasztott tab tartalmat, és aktiváljuk a gombot
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
     function generateQRCode() {
       const text = document.getElementById("text-input").value.trim();
       if (!text) {
@@ -111,6 +183,9 @@
     function printLabel() {
       window.print();
     }
+
+    // Az alapértelmezett tab megnyitása betöltéskor
+    document.getElementById("defaultOpen").click();
 
     // Automatikus generálás betöltéskor teszteléshez
     window.onload = function() {
