@@ -15,7 +15,6 @@
       display: flex; /* Bal-jobb elrendezés */
       box-sizing: border-box;
       user-select: all; /* Kijelölés engedélyezése */
-      position: relative;
     }
     .qr-code {
       width: 390px; /* QR-kód mérete 30%-kal növelve */
@@ -30,19 +29,18 @@
       max-height: 100%;
     }
     .text-area {
-      width: 378px;
-      height: 354px;
+      width: 378px; /* Maradék szélesség */
+      height: 354px; /* Teljes magasság */
       margin: 0 10px;
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Alapértelmezett középre */
+      justify-content: center; /* Függőlegesen középre */
       text-align: left;
       font-size: 16px;
-      position: relative;
     }
-    .text-item {
-      position: absolute;
-      cursor: move;
+    .anyagszam {
+      font-size: 32px; /* Anyagszám mérete duplázva */
+      font-weight: bold;
     }
     @media print {
       body * {
@@ -65,75 +63,19 @@
     <input type="text" id="text-input" value="3000002345|Liechti 20.34/Hidraulik pump" maxlength="60">
     <button onclick="generateQRCode()">Címke generálása</button>
     <button onclick="printLabel()">Címke nyomtatása</button>
-    <button onclick="logPositions()">Pozíciók kiírása</button>
   </div>
   <div id="label-container" class="label-container" style="display: none;">
     <div class="qr-code">
       <canvas id="qrcode"></canvas>
     </div>
-    <div class="text-area" id="text-area">
-      <div class="text-item" id="szam-item"><strong><span id="szam"></span></strong></div>
-      <div class="text-item" id="space-item" style="height: 10px;"></div>
-      <div class="text-item" id="szoveg-item"><span id="szoveg"></span></div>
+    <div class="text-area">
+      <div class="anyagszam"><span id="szam"></span></div>
+      <div style="height: 10px;"></div> <!-- Üres sor -->
+      <div><span id="szoveg"></span></div>
     </div>
   </div>
 
   <script>
-    let isDragging = false;
-    let currentItem = null;
-    let initialX;
-    let initialY;
-
-    // Globális változók a pozíciók tárolására
-    let szamPosition = { top: '100px', left: '0px' };
-    let spacePosition = { top: '130px', left: '0px' };
-    let szovegPosition = { top: '140px', left: '0px' };
-
-    function startDragging(e) {
-      if (e.target.classList.contains('text-item')) {
-        isDragging = true;
-        currentItem = e.target;
-        initialX = e.clientX - (parseInt(currentItem.style.left) || 0);
-        initialY = e.clientY - (parseInt(currentItem.style.top) || 0);
-        currentItem.style.zIndex = 1000;
-      }
-    }
-
-    function drag(e) {
-      if (isDragging && currentItem) {
-        e.preventDefault();
-        const newX = e.clientX - initialX;
-        const newY = e.clientY - initialY;
-        const textArea = document.getElementById('text-area').getBoundingClientRect();
-        const maxX = textArea.width - currentItem.offsetWidth;
-        const maxY = textArea.height - currentItem.offsetHeight;
-
-        currentItem.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
-        currentItem.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
-
-        // Frissítjük a globális pozíciókat
-        if (currentItem.id === 'szam-item') {
-          szamPosition = { top: currentItem.style.top, left: currentItem.style.left };
-        } else if (currentItem.id === 'space-item') {
-          spacePosition = { top: currentItem.style.top, left: currentItem.style.left };
-        } else if (currentItem.id === 'szoveg-item') {
-          szovegPosition = { top: currentItem.style.top, left: currentItem.style.left };
-        }
-      }
-    }
-
-    function stopDragging() {
-      if (isDragging && currentItem) {
-        isDragging = false;
-        currentItem.style.zIndex = 'auto';
-        currentItem = null;
-      }
-    }
-
-    document.addEventListener('mousedown', startDragging);
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', stopDragging);
-
     function generateQRCode() {
       const text = document.getElementById("text-input").value.trim();
       if (!text) {
@@ -151,41 +93,4 @@
       const qrcodeCanvas = document.getElementById("qrcode");
       qrcodeCanvas.width = 390;
       qrcodeCanvas.height = 390;
-      QRCode.toCanvas(qrcodeCanvas, text, { width: 390 }, function(error) {
-        if (error) {
-          console.error("QR-kód hiba:", error);
-          alert("Hiba a QR-kód generálásakor: " + error.message);
-        }
-      });
-
-      // Pozíciók beállítása, de csak akkor, ha még nincsenek módosítva
-      const szamItem = document.getElementById("szam-item");
-      const spaceItem = document.getElementById("space-item");
-      const szovegItem = document.getElementById("szoveg-item");
-
-      szamItem.style.top = szamPosition.top;
-      szamItem.style.left = szamPosition.left;
-      spaceItem.style.top = spacePosition.top;
-      spaceItem.style.left = spacePosition.left;
-      szovegItem.style.top = szovegPosition.top;
-      szovegItem.style.left = szovegPosition.left;
-    }
-
-    function printLabel() {
-      window.print();
-    }
-
-    function logPositions() {
-      const szamItem = document.getElementById("szam-item");
-      const szovegItem = document.getElementById("szoveg-item");
-      const szamTop = szamItem.style.top || '100px';
-      const szamLeft = szamItem.style.left || '0px';
-      const szovegTop = szovegItem.style.top || '140px';
-      const szovegLeft = szovegItem.style.left || '0px';
-      console.log("Anyagszám pozíció: top=" + szamTop + ", left=" + szamLeft);
-      console.log("Szöveg pozíció: top=" + szovegTop + ", left=" + szovegLeft);
-      alert("Pozíciók a konzolban találhatók! Másold ki, és küldd el, ha kész vagy.");
-    }
-  </script>
-</body>
-</html>
+      QRCode.toCanvas(qrcodeCanvas, tex
