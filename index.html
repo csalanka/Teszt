@@ -7,7 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <style>
     .label-container {
-      width: 708px; /* 60 mm 300 DPI */
+      width: 798px; /* 60 mm 300 DPI + extra 90 px a QR-kód méretének növeléséhez */
       height: 354px; /* 30 mm 300 DPI */
       border: 1px solid black;
       margin: 20px auto;
@@ -17,9 +17,9 @@
       user-select: all; /* Kijelölés engedélyezése */
     }
     .qr-code {
-      width: 300px; /* QR-kód mérete */
-      height: 300px;
-      margin: 27px 10px; /* Függőlegesen középre igazítás */
+      width: 390px; /* QR-kód mérete 30%-kal növelve (300 * 1.3) */
+      height: 390px;
+      margin: 0px 10px; /* Függőlegesen igazítás */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -29,9 +29,9 @@
       max-height: 100%;
     }
     .text-area {
-      width: 378px; /* Maradék szélesség (708 - 300 - 2*10 margin) */
-      height: 334px; /* Magasság a margók nélkül */
-      margin: 10px;
+      width: 378px; /* Maradék szélesség (798 - 390 - 2*10 margin) */
+      height: 354px; /* Teljes magasság */
+      margin: 0px 10px;
       display: flex;
       flex-direction: column;
       justify-content: center; /* Függőlegesen középre */
@@ -87,9 +87,9 @@
       const labelContainer = document.getElementById("label-container");
       labelContainer.style.display = "flex";
       const qrcodeCanvas = document.getElementById("qrcode");
-      qrcodeCanvas.width = 300;
-      qrcodeCanvas.height = 300;
-      QRCode.toCanvas(qrcodeCanvas, text, { width: 300 }, function(error) {
+      qrcodeCanvas.width = 390; // QR-kód méretének növelése
+      qrcodeCanvas.height = 390;
+      QRCode.toCanvas(qrcodeCanvas, text, { width: 390 }, function(error) {
         if (error) {
           console.error("QR-kód hiba:", error);
           alert("Hiba a QR-kód generálásakor: " + error.message);
