@@ -114,21 +114,20 @@
       background-color: rgba(0,0,0,0.5);
       z-index: 999;
     }
-    /* Címke stílusok */
     .label-container {
-      width: 708px; /* 60 mm 300 DPI */
-      height: 354px; /* 30 mm 300 DPI */
+      width: 708px;
+      height: 354px;
       border: 1px solid black;
       margin: 20px auto;
-      display: flex; /* Bal-jobb elrendezés */
+      display: flex;
       box-sizing: border-box;
-      user-select: all; /* Kijelölés engedélyezése */
+      user-select: all;
       position: relative;
     }
     .qr-code {
-      width: 300px; /* QR-kód mérete visszaállítva az eredetire */
+      width: 300px;
       height: 300px;
-      margin: 27px 10px; /* Függőlegesen középre igazítás */
+      margin: 27px 10px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -138,16 +137,16 @@
       max-height: 100%;
     }
     .text-area {
-      width: 378px; /* Maradék szélesség (708 - 300 - 2*10 margin) */
-      height: 354px; /* Teljes magasság */
+      width: 378px;
+      height: 354px;
       margin: 0 10px;
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Függőlegesen középre */
+      justify-content: center;
       text-align: left;
     }
     .anyagszam {
-      font-size: 32px; /* Anyagszám mérete duplázva */
+      font-size: 32px;
       font-weight: bold;
     }
     @media print {
@@ -179,7 +178,6 @@
       <a href="#" onclick="showSettings()">Beállítások</a>
     </div>
 
-    <!-- Lap 1: QR Kód Generálás -->
     <div id="lap1" class="lap-content active">
       <h2>QR Kód Generálás</h2>
       <div class="form-group">
@@ -196,13 +194,12 @@
         </div>
         <div class="text-area">
           <div class="anyagszam"><span id="szam"></span></div>
-          <div style="height: 10px;"></div> <!-- Üres sor -->
+          <div style="height: 10px;"></div>
           <div><span id="szoveg"></span></div>
         </div>
       </div>
     </div>
 
-    <!-- Lap 2: QR Kód Olvasás -->
     <div id="lap2" class="lap-content">
       <h2>QR Kód Olvasás</h2>
       <div class="form-group">
@@ -231,8 +228,11 @@
       <div class="form-group">
         <label for="raktar">Raktár:</label>
         <select id="raktar">
-          <option value="Raktár 1">Raktár 1</option>
-          <option value="Raktár 2">Raktár 2</option>
+          <option value="">Válassz raktárat</option>
+          <option value="0060">0060</option>
+          <option value="0350">0350</option>
+          <option value="0560">0560</option>
+          <option value="0000">0000</option>
         </select>
       </div>
       <div class="form-group">
@@ -247,7 +247,6 @@
       <div id="qr-reader-error" class="error"></div>
     </div>
 
-    <!-- Lap 3: Foglalások -->
     <div id="lap3" class="lap-content">
       <h2>Foglalások</h2>
       <button id="delete-all-btn">Összes törlése</button>
@@ -275,13 +274,11 @@
       </table>
     </div>
 
-    <!-- Lap 4: Verziótörténet -->
     <div id="lap4" class="lap-content">
       <h2>Verziótörténet</h2>
       <button onclick="showVersionHistory()">Verziótörténet megtekintése</button>
     </div>
 
-    <!-- Lap 5: Beállítások -->
     <div id="lap5" class="lap-content" style="display: none;">
       <h2>Beállítások</h2>
       <button id="add-machine-btn">Gép hozzáadása</button>
@@ -300,7 +297,6 @@
     </div>
   </div>
 
-  <!-- Jelszavas popup a Beállításokhoz -->
   <div class="popup-overlay" id="settings-password-overlay"></div>
   <div class="popup" id="settings-password-popup">
     <h3>Jelszó megadása</h3>
@@ -313,17 +309,16 @@
     <button onclick="closeSettingsPopup()">Mégse</button>
   </div>
 
-  <!-- Verziótörténet popup -->
   <div class="popup-overlay" id="version-history-overlay"></div>
   <div class="popup" id="version-history-popup">
     <h3>Verziótörténet</h3>
     <p>1.0 - Kezdeti verzió (2025.03.01)</p>
     <p>1.1 - QR kód olvasás hozzáadva (2025.03.05)</p>
     <p>1.2 - Foglalások kezelése (2025.03.10)</p>
+    <p>3.5.0 - QR kód generálás elrendezése javítva, raktárak (0060, 0350, 0560, 0000) és gépek frissítve (2025.03.14)</p>
     <button onclick="closeVersionHistory()">Bezárás</button>
   </div>
 
-  <!-- Törlés jelszavas popup -->
   <div class="popup-overlay" id="delete-password-overlay"></div>
   <div class="popup" id="delete-password-popup">
     <h3>Jelszó megadása</h3>
@@ -342,16 +337,20 @@
       "gepek": {
         "MFC-terület": [
           { "nev": "DMG 1", "rendelesiSzam": "U00980000101", "koltseghelySzam": "15009126" },
-          { "nev": "DMG 2", "rendelesiSzam": "U00980000102", "koltseghelySzam": "15009126" }
+          { "nev": "DMG 2", "rendelesiSzam": "U00980000102", "koltseghelySzam": "15009126" },
+          { "nev": "DMG 3", "rendelesiSzam": "U00980000103", "koltseghelySzam": "15009126" }
         ],
         "MFS-terület": [
-          { "nev": "TOS 1", "rendelesiSzam": "935036", "koltseghelySzam": "15009115" }
+          { "nev": "TOS 1", "rendelesiSzam": "935036", "koltseghelySzam": "15009115" },
+          { "nev": "TOS 2", "rendelesiSzam": "935037", "koltseghelySzam": "15009115" }
         ],
         "MFH-terület": [
-          { "nev": "Blohm 30/299", "rendelesiSzam": "U941030_299", "koltseghelySzam": "15009450" }
+          { "nev": "Blohm 30/299", "rendelesiSzam": "U941030_299", "koltseghelySzam": "15009450" },
+          { "nev": "Blohm 30/300", "rendelesiSzam": "U941030_300", "koltseghelySzam": "15009450" }
         ],
         "M2B-terület": [
-          { "nev": "Böhringer DUS 001/175", "rendelesiSzam": "", "koltseghelySzam": "15009131" }
+          { "nev": "Böhringer DUS 001/175", "rendelesiSzam": "", "koltseghelySzam": "15009131" },
+          { "nev": "Böhringer DUS 001/176", "rendelesiSzam": "", "koltseghelySzam": "15009131" }
         ]
       },
       "foglalasok": []
@@ -364,8 +363,8 @@
         lapContent.classList.remove('active');
       });
       document.getElementById('lap' + lap).classList.add('active');
-      if (lap === 2) updateMachineDropdown(); // Gépek dropdown frissítése
-      if (lap === 3) updateFoglalasLista(); // Foglalási lap betöltésekor frissítjük a listát
+      if (lap === 2) updateMachineDropdown();
+      if (lap === 3) updateFoglalasLista();
     }
 
     // Beállítások lap jelszavas védelme
@@ -425,7 +424,7 @@
       document.getElementById("szoveg").textContent = textPart;
 
       const labelContainer = document.getElementById("label-container");
-      labelContainer.style.display = "flex"; // Biztosítom, hogy látható legyen
+      labelContainer.style.display = "flex";
       const qrcodeCanvas = document.getElementById("qrcode");
       qrcodeCanvas.width = 300;
       qrcodeCanvas.height = 300;
@@ -541,7 +540,6 @@
         year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
       });
 
-      // Gép adatainak lekérdezése
       const gep = foglalasData.gepek[selectedTerulet]?.find(g => g.nev === selectedMachine) || {};
 
       const foglalas = {
@@ -559,7 +557,6 @@
         datum: currentDate
       };
       foglalasok.push(foglalas);
-      // Frissítjük a JSON adatot (lokálisan)
       foglalasData.foglalasok = foglalasok;
       updateFoglalasLista();
     }
@@ -582,7 +579,6 @@
           return;
         }
 
-        // Ellenőrizzük, hogy a QR-kód már létezik-e
         const existingFoglalas = foglalasok.find(f => f.qrKod === cimkeInput);
         if (existingFoglalas) {
           document.getElementById("qr-reader-error").textContent = "Ez a QR-kód már rögzítve van!";
@@ -621,7 +617,6 @@
       }
     }
 
-    // Törlés logika
     function showDeletePopup(index) {
       document.getElementById("delete-password-popup").style.display = "block";
       document.getElementById("delete-password-overlay").style.display = "block";
@@ -637,12 +632,11 @@
           checkPasswordForAll();
         } else if (confirm(`Biztosan törlöd a ${window.deleteIndex + 1}. rekordot?`)) {
           foglalasok.splice(window.deleteIndex, 1);
-          // Sorszámok újraszámozása törlés után
           foglalasok = foglalasok.map((foglalas, index) => ({
             ...foglalas,
             sorszam: index + 1
           }));
-          foglalasData.foglalasok = foglalasok; // Frissítjük a JSON adatot
+          foglalasData.foglalasok = foglalasok;
           updateFoglalasLista();
           alert("A rekord törölve");
         }
@@ -660,7 +654,7 @@
     }
 
     document.getElementById("delete-all-btn").addEventListener("click", function() {
-      showDeletePopup(-1); // -1 jelzi az összes törlést
+      showDeletePopup(-1);
     });
 
     function checkPasswordForAll() {
@@ -670,7 +664,7 @@
         document.getElementById("delete-password-overlay").style.display = "none";
         if (confirm("Biztosan törölni szeretnéd az összes rekordot?")) {
           foglalasok = [];
-          foglalasData.foglalasok = foglalasok; // Frissítjük a JSON adatot
+          foglalasData.foglalasok = foglalasok;
           updateFoglalasLista();
           alert("Az összes rekord törölve");
         }
@@ -680,7 +674,6 @@
       document.getElementById("delete-password").value = "";
     }
 
-    // Gépek kezelése a Beállítások lapon
     function updateMachineTable() {
       const tbody = document.getElementById("machine-body");
       tbody.innerHTML = "";
@@ -729,7 +722,6 @@
 
     document.getElementById("add-machine-btn").addEventListener("click", addMachine);
 
-    // Automatikus generálás betöltéskor teszteléshez
     window.onload = function() {
       generateQRCode();
     };
