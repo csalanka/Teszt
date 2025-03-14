@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Címke Teszt</title>
+  <title>Címke Generáló Program</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
     .label-container {
       width: 798px; /* 60 mm 300 DPI + extra 90 px a QR-kód méretének növeléséhez */
       height: 354px; /* 30 mm 300 DPI */
       border: 1px solid black;
       margin: 20px auto;
-      font-family: Arial, sans-serif;
       display: flex; /* Bal-jobb elrendezés */
       box-sizing: border-box;
       user-select: all; /* Kijelölés engedélyezése */
@@ -59,8 +62,10 @@
   </style>
 </head>
 <body>
+  <h2>Címke Generáló Program</h2>
   <div>
-    <input type="text" id="text-input" value="3000002345|Liechti 20.34/Hidraulik pump" maxlength="60">
+    <label for="text-input">Címke adat (pl. 3000002345|Liechti 20.34/Hidraulik pump):</label>
+    <input type="text" id="text-input" value="3000002345|Liechti 20.34/Hidraulik pump" maxlength="60" style="width: 400px; margin: 10px 0;">
     <button onclick="generateQRCode()">Címke generálása</button>
     <button onclick="printLabel()">Címke nyomtatása</button>
   </div>
