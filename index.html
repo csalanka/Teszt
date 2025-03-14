@@ -84,12 +84,19 @@
     let initialX;
     let initialY;
 
+    // Globális változók a pozíciók tárolására
+    let szamPosition = { top: '100px', left: '0px' };
+    let spacePosition = { top: '130px', left: '0px' };
+    let szovegPosition = { top: '140px', left: '0px' };
+
     function startDragging(e) {
-      isDragging = true;
-      currentItem = e.target;
-      initialX = e.clientX - (currentItem.offsetLeft || 0);
-      initialY = e.clientY - (currentItem.offsetTop || 0);
-      currentItem.style.zIndex = 1000;
+      if (e.target.classList.contains('text-item')) {
+        isDragging = true;
+        currentItem = e.target;
+        initialX = e.clientX - (parseInt(currentItem.style.left) || 0);
+        initialY = e.clientY - (parseInt(currentItem.style.top) || 0);
+        currentItem.style.zIndex = 1000;
+      }
     }
 
     function drag(e) {
@@ -103,6 +110,15 @@
 
         currentItem.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
         currentItem.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+
+        // Frissítjük a globális pozíciókat
+        if (currentItem.id === 'szam-item') {
+          szamPosition = { top: currentItem.style.top, left: currentItem.style.left };
+        } else if (currentItem.id === 'space-item') {
+          spacePosition = { top: currentItem.style.top, left: currentItem.style.left };
+        } else if (currentItem.id === 'szoveg-item') {
+          szovegPosition = { top: currentItem.style.top, left: currentItem.style.left };
+        }
       }
     }
 
@@ -110,12 +126,7 @@
       if (isDragging && currentItem) {
         isDragging = false;
         currentItem.style.zIndex = 'auto';
-        // Rögzítjük a pozíciót
-        const textArea = document.getElementById('text-area').getBoundingClientRect();
-        const maxX = textArea.width - currentItem.offsetWidth;
-        const maxY = textArea.height - currentItem.offsetHeight;
-        currentItem.style.left = Math.max(0, Math.min(parseInt(currentItem.style.left) || 0, maxX)) + 'px';
-        currentItem.style.top = Math.max(0, Math.min(parseInt(currentItem.style.top) || 0, maxY)) + 'px';
+        currentItem = null;
       }
     }
 
@@ -147,13 +158,17 @@
         }
       });
 
-      // Alapértelmezett pozíciók beállítása
-      document.getElementById("szam-item").style.top = '100px';
-      document.getElementById("szam-item").style.left = '0px';
-      document.getElementById("space-item").style.top = '130px';
-      document.getElementById("space-item").style.left = '0px';
-      document.getElementById("szoveg-item").style.top = '140px';
-      document.getElementById("szoveg-item").style.left = '0px';
+      // Pozíciók beállítása, de csak akkor, ha még nincsenek módosítva
+      const szamItem = document.getElementById("szam-item");
+      const spaceItem = document.getElementById("space-item");
+      const szovegItem = document.getElementById("szoveg-item");
+
+      szamItem.style.top = szamPosition.top;
+      szamItem.style.left = szamPosition.left;
+      spaceItem.style.top = spacePosition.top;
+      spaceItem.style.left = spacePosition.left;
+      szovegItem.style.top = szovegPosition.top;
+      szovegItem.style.left = szovegPosition.left;
     }
 
     function printLabel() {
