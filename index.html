@@ -87,8 +87,8 @@
     function startDragging(e) {
       isDragging = true;
       currentItem = e.target;
-      initialX = e.clientX - currentItem.getBoundingClientRect().left;
-      initialY = e.clientY - currentItem.getBoundingClientRect().top;
+      initialX = e.clientX - (currentItem.offsetLeft || 0);
+      initialY = e.clientY - (currentItem.offsetTop || 0);
       currentItem.style.zIndex = 1000;
     }
 
@@ -107,9 +107,16 @@
     }
 
     function stopDragging() {
-      isDragging = false;
-      currentItem.style.zIndex = 'auto';
-      currentItem = null;
+      if (isDragging && currentItem) {
+        isDragging = false;
+        currentItem.style.zIndex = 'auto';
+        // Rögzítjük a pozíciót
+        const textArea = document.getElementById('text-area').getBoundingClientRect();
+        const maxX = textArea.width - currentItem.offsetWidth;
+        const maxY = textArea.height - currentItem.offsetHeight;
+        currentItem.style.left = Math.max(0, Math.min(parseInt(currentItem.style.left) || 0, maxX)) + 'px';
+        currentItem.style.top = Math.max(0, Math.min(parseInt(currentItem.style.top) || 0, maxY)) + 'px';
+      }
     }
 
     document.addEventListener('mousedown', startDragging);
@@ -142,8 +149,11 @@
 
       // Alapértelmezett pozíciók beállítása
       document.getElementById("szam-item").style.top = '100px';
+      document.getElementById("szam-item").style.left = '0px';
       document.getElementById("space-item").style.top = '130px';
+      document.getElementById("space-item").style.left = '0px';
       document.getElementById("szoveg-item").style.top = '140px';
+      document.getElementById("szoveg-item").style.left = '0px';
     }
 
     function printLabel() {
@@ -153,8 +163,12 @@
     function logPositions() {
       const szamItem = document.getElementById("szam-item");
       const szovegItem = document.getElementById("szoveg-item");
-      console.log("Anyagszám pozíció: top=" + szamItem.style.top + ", left=" + szamItem.style.left);
-      console.log("Szöveg pozíció: top=" + szovegItem.style.top + ", left=" + szovegItem.style.left);
+      const szamTop = szamItem.style.top || '100px';
+      const szamLeft = szamItem.style.left || '0px';
+      const szovegTop = szovegItem.style.top || '140px';
+      const szovegLeft = szovegItem.style.left || '0px';
+      console.log("Anyagszám pozíció: top=" + szamTop + ", left=" + szamLeft);
+      console.log("Szöveg pozíció: top=" + szovegTop + ", left=" + szovegLeft);
       alert("Pozíciók a konzolban találhatók! Másold ki, és küldd el, ha kész vagy.");
     }
   </script>
