@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Címke Teszt</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <style>
+    .label-container {
+      width: 708px; /* 60 mm 300 DPI */
+      height: 354px; /* 30 mm 300 DPI */
+      border: 1px solid black;
+      margin: 20px auto;
+      font-family: Arial, sans-serif;
+      display: flex; /* Bal-jobb elrendezés */
+      box-sizing: border-box;
+      user-select: all; /* Kijelölés engedélyezése */
+    }
+    .qr-code {
+      width: 300px; /* QR-kód mérete */
+      height: 300px;
+      margin: 27px 10px; /* Függőlegesen középre igazítás */
+    }
+    .text-area {
+      width: 378px; /* Maradék szélesség (708 - 300 - 2*10 margin) */
+      height: 334px; /* Magasság a margók nélkül */
+      margin: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Függőlegesen középre */
+      text-align: left;
+      font-size: 16px;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .label-container, .label-container * {
+        visibility: visible;
+      }
+      .label-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <input type="text" id="text-input" value="3000002345|Liechti 20.34/Hidraulik pump" maxlength="60">
+    <button onclick="generateQRCode()">Címke generálása</button>
+    <button onclick="printLabel()">Címke nyomtatása</button>
+  </div>
+  <div id="label-container" class="label-container" style="display: none;">
+    <div class="qr-code" id="qrcode"></div>
+    <div class="text-area">
+      <div><strong>Anyagszám:</strong> <span id="szam"></span></div>
+      <div><strong>Szöveg:</strong> <span id="szoveg"></span></div>
+    </div>
+  </div>
+
+  <script>
+    function generateQRCode() {
+      const text = document.getElementById("text-input").value.trim();
+      if (!text) {
+        alert("Kérlek, adj meg szöveget!");
+        return;
+      }
+      const parts = text.split("|");
+      const anyagszám = parts[0] || "";
+      const textPart = parts.slice(1).join("|") || "";
+      document.getElementById("szam").textContent = anyagszám;
+      document.getElementById("szoveg").textContent = textPart;
+
+      const labelContainer = document.getElementById("label-container");
+      labelContainer.style.display = "flex";
+      QRCode.toCanvas(document.getElementById("qrcode"), text, { width: 300 }, function(error) {
+        if (error) console.error("QR-kód hiba:", error);
+      });
+    }
+
+    function printLabel() {
+      window.print();
+    }
+  </script>
+</body>
+</html>
