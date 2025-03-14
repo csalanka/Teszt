@@ -17,9 +17,9 @@
       user-select: all; /* Kijelölés engedélyezése */
     }
     .qr-code {
-      width: 390px; /* QR-kód mérete 30%-kal növelve (300 * 1.3) */
+      width: 390px; /* QR-kód mérete 30%-kal növelve */
       height: 390px;
-      margin: 0px 10px; /* Függőlegesen igazítás */
+      margin: 10px 10px 0 10px; /* Feljebb rakás: margin-top 10px */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -29,9 +29,9 @@
       max-height: 100%;
     }
     .text-area {
-      width: 378px; /* Maradék szélesség (798 - 390 - 2*10 margin) */
+      width: 378px; /* Maradék szélesség */
       height: 354px; /* Teljes magasság */
-      margin: 0px 10px;
+      margin: 0 10px;
       display: flex;
       flex-direction: column;
       justify-content: center; /* Függőlegesen középre */
@@ -87,7 +87,7 @@
       const labelContainer = document.getElementById("label-container");
       labelContainer.style.display = "flex";
       const qrcodeCanvas = document.getElementById("qrcode");
-      qrcodeCanvas.width = 390; // QR-kód méretének növelése
+      qrcodeCanvas.width = 390;
       qrcodeCanvas.height = 390;
       QRCode.toCanvas(qrcodeCanvas, text, { width: 390 }, function(error) {
         if (error) {
