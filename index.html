@@ -15,6 +15,7 @@
       display: flex; /* Bal-jobb elrendezés */
       box-sizing: border-box;
       user-select: all; /* Kijelölés engedélyezése */
+      position: relative;
     }
     .qr-code {
       width: 390px; /* QR-kód mérete 30%-kal növelve */
@@ -36,7 +37,6 @@
       flex-direction: column;
       justify-content: center; /* Függőlegesen középre */
       text-align: left;
-      font-size: 16px;
     }
     .anyagszam {
       font-size: 32px; /* Anyagszám mérete duplázva */
@@ -64,7 +64,7 @@
     <button onclick="generateQRCode()">Címke generálása</button>
     <button onclick="printLabel()">Címke nyomtatása</button>
   </div>
-  <div id="label-container" class="label-container" style="display: none;">
+  <div id="label-container" class="label-container">
     <div class="qr-code">
       <canvas id="qrcode"></canvas>
     </div>
@@ -89,8 +89,28 @@
       document.getElementById("szoveg").textContent = textPart;
 
       const labelContainer = document.getElementById("label-container");
-      labelContainer.style.display = "flex";
+      labelContainer.style.display = "flex"; // Biztosítom, hogy látható legyen
       const qrcodeCanvas = document.getElementById("qrcode");
       qrcodeCanvas.width = 390;
       qrcodeCanvas.height = 390;
-      QRCode.toCanvas(qrcodeCanvas, tex
+      QRCode.toCanvas(qrcodeCanvas, text, { width: 390 }, function(error) {
+        if (error) {
+          console.error("QR-kód hiba:", error);
+          alert("Hiba a QR-kód generálásakor: " + error.message);
+        } else {
+          console.log("QR-kód sikeresen generálva!");
+        }
+      });
+    }
+
+    function printLabel() {
+      window.print();
+    }
+
+    // Automatikus generálás betöltéskor teszteléshez
+    window.onload = function() {
+      generateQRCode();
+    };
+  </script>
+</body>
+</html>
