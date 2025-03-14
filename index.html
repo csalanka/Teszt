@@ -20,7 +20,7 @@
       width: 300px; /* QR-kód mérete */
       height: 300px;
       margin: 27px 10px; /* Függőlegesen középre igazítás */
-      display: flex; /* Biztosítja, hogy a tartalom látható legyen */
+      display: flex;
       justify-content: center;
       align-items: center;
     }
@@ -65,7 +65,8 @@
       <canvas id="qrcode"></canvas>
     </div>
     <div class="text-area">
-      <div><span id="szam"></span></div>
+      <div><strong><span id="szam"></span></strong></div>
+      <div style="height: 10px;"></div> <!-- Üres sor -->
       <div><span id="szoveg"></span></div>
     </div>
   </div>
@@ -86,7 +87,7 @@
       const labelContainer = document.getElementById("label-container");
       labelContainer.style.display = "flex";
       const qrcodeCanvas = document.getElementById("qrcode");
-      qrcodeCanvas.width = 300; // Biztosítjuk, hogy a canvas mérete megegyezzen
+      qrcodeCanvas.width = 300;
       qrcodeCanvas.height = 300;
       QRCode.toCanvas(qrcodeCanvas, text, { width: 300 }, function(error) {
         if (error) {
